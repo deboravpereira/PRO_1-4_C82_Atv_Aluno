@@ -39,8 +39,7 @@ export default class TransactionScreen extends Component {
 
     this.setState({
       /*status === "granted" é verdadeiro se o usuário concedeu permissão
-          status === "granted" é falso se o usuário não concedeu permissão
-        */
+      status === "granted" é falso se o usuário não concedeu permissão */
       hasCameraPermissions: status === "granted",
       domState: domState,
       scanned: false
@@ -72,40 +71,25 @@ export default class TransactionScreen extends Component {
 
     var transactionType = await this.checkBookAvailability(bookId);
     
-         if (!transactionType) {
+    if (!transactionType) {
       this.setState({ bookId: "", studentId: "" });
       // Apenas para usuários do Android
       // ToastAndroid.show("O livro não existe no banco de dados da biblioteca!", ToastAndroid.SHORT);
       Alert.alert("O livro não existe no banco de dados da biblioteca!");
-    } 
-    else if (transactionType === "issue") {
-           var isEligible = await this.checkStudentEligibilityForBookIssue(
-        studentId
-      );
+    } else if (transactionType === "issue") {
+      var isEligible = await this.checkStudentEligibilityForBookIssue(studentId);
 
       if (isEligible) {
         var { bookName, studentName } = this.state;
         this.initiateBookIssue(bookId, studentId, bookName, studentName);
         // Apenas para usuários do Android
-      // ToastAndroid.show("Livro entregue para o aluno!", ToastAndroid.SHORT);
-      Alert.alert("Livro entregue para o aluno!");
+        // ToastAndroid.show("Livro entregue para o aluno!", ToastAndroid.SHORT);
+        Alert.alert("Livro entregue para o aluno!");
       }
       
-        } else {
-         var isEligible = await this.checkStudentEligibilityForBookReturn(
-        bookId,
-        studentId
-      );
-
-      if (isEligible) {
-        var { bookName, studentName } = this.state;
-        this.initiateBookReturn(bookId, studentId, bookName, studentName);
-        
-       // Apenas para usuários do Android
-       // ToastAndroid.show("Livro retornado à biblioteca!", ToastAndroid.SHORT);
-       Alert.alert("Livro retornado à biblioteca!");
-      }
-    }
+    } 
+    
+    //Acrescente condição para retorno do livro à biblioteca
       
   };
 
@@ -188,6 +172,23 @@ export default class TransactionScreen extends Component {
 
     return isStudentEligible;
   };
+
+  checkStudentEligibilityForBookReturn = async (bookId, studentId) => {
+    //CONSULTA AO BANCO DE DADOS
+    const transactionRef = await db
+      .collection("transactions")
+      .where("book_id", "==", bookId)
+      .limit(1) //o método limit(1) selecionará apenas a última transação do livro
+      .get();
+    
+    //Variável utilizada para saber se estudante é elegível ou não
+    var isStudentEligible = "";
+    transactionRef.docs.map();
+    
+    //RETORNE O RESULTADO
+    return isStudentEligible;
+  };
+
   
   
   initiateBookIssue = async (bookId, studentId, bookName, studentName) => {
